@@ -1,21 +1,22 @@
 // import './header.css'
-import axios from 'axios'
+import axios from "axios";
 import "./HomePage.css";
 import Header from "../components/Header";
 // import { products } from "../../starting-code/data/products";
-import { useEffect,useState  } from 'react';
+import { useEffect, useState } from "react";
 
-export function HomePage({cart}) {
-  const [products, setProducts] = useState([ ]);
-  useEffect(()=>{
-    axios.get  ('/api/products')
-    .then((response)=>{
+export function HomePage({ cart ,loadCart }) {
+  const [products, setProducts] = useState([]);
+  const [Quantity, setQuantity] = useState(1);
+  useEffect(() => {
+    const getHomeData = async () => {
+      const response = await axios.get("/api/products");
+
       setProducts(response.data);
-      
-    }) 
+    };
+    getHomeData();
+  }, []);
 
-  },[])
-  
   return (
     <>
       <title>Ecommerce Project</title>
@@ -23,16 +24,14 @@ export function HomePage({cart}) {
       <Header cart={cart} />
 
       <div className="home-page">
+
         <div className="products-grid">
           {products.map((product) => {
             return (
               <>
-                <div  className="product-container">
+                <div className="product-container">
                   <div className="product-image-container">
-                    <img
-                      className="product-image"
-                      src={product.image}
-                    />
+                    <img className="product-image" src={product.image} />
                   </div>
 
                   <div className="product-name limit-text-to-2-lines">
@@ -42,15 +41,25 @@ export function HomePage({cart}) {
                   <div className="product-rating-container">
                     <img
                       className="product-rating-stars"
-                      src={`images/ratings/rating-${product.rating.stars*10}.png`}
+                      src={`images/ratings/rating-${product.rating.stars * 10}.png`}
                     />
-                    <div className="product-rating-count link-primary">{product.rating.count}</div>
+                    <div className="product-rating-count link-primary">
+                      {product.rating.count}
+                    </div>
                   </div>
 
-                  <div className="product-price">$ {(product.priceCents/100).toFixed(2) }</div>
+                  <div className="product-price">
+                    $ {(product.priceCents / 100).toFixed(2)}
+                  </div>
 
                   <div className="product-quantity-container">
-                    <select>
+                    <select value={Quantity} onChange={(event)=>{
+                       const quantitySelected= Number(event.target.value);
+                       setQuantity(quantitySelected);
+                       console.log(quantitySelected );
+                       
+                      
+                    }} >
                       <option value="1">1</option>
                       <option value="2">2</option>
                       <option value="3">3</option>
@@ -71,15 +80,21 @@ export function HomePage({cart}) {
                     Added
                   </div>
 
-                  <button className="add-to-cart-button button-primary">
+                  <button className="add-to-cart-button button-primary"
+                  onClick={ async()=>{
+                    await axios.post('/api/cart-items',{
+                      productId:product.id,
+                      quantity:1
+                    });
+                   await loadCart();
+                  }}
+                  >
                     Add to Cart
                   </button>
                 </div>
               </>
             );
           })}
-
-          
         </div>
       </div>
     </>
