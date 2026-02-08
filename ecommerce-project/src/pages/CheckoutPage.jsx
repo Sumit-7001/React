@@ -91,7 +91,8 @@ export function CheckoutPage({ cart = [] }) {
                         <div className="product-quantity">
                           Quantity:{" "}
                           <span className="quantity-label">
-                            {cartItem.quantity}
+                            {cartItem.quantity} <h4 style={{ color: "green" }}>Update Delete</h4>
+
                           </span>
                         </div>
                       </div>
