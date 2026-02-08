@@ -4,10 +4,16 @@ import "./checkout.css";
 import axios from "axios";
 import dayjs from "dayjs";
 
-export function CheckoutPage({ cart = [] }) {
+export function CheckoutPage({ cart ,loadCart}) {
   const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [paymentSummary, setPaymentSummary] = useState(null);
+  
+  const updatePayemntSummary=async ()=>{
+    const response=await axios .get("/api/payment-summary")
+        setPaymentSummary(response.data);
 
+   
+  }
   useEffect(() => {
     axios
       .get("/api/delivery-options?expand=estimatedDeliveryTime")
@@ -16,12 +22,7 @@ export function CheckoutPage({ cart = [] }) {
       })
       .catch((err) => console.error(err));
 
-    axios
-      .get("/api/payment-summary")
-      .then((response) => {
-        setPaymentSummary(response.data);
-      })
-      .catch((err) => console.error(err));
+    updatePayemntSummary();
   }, []);
 
   return (
@@ -91,8 +92,8 @@ export function CheckoutPage({ cart = [] }) {
                         <div className="product-quantity">
                           Quantity:{" "}
                           <span className="quantity-label">
-                            {cartItem.quantity} <h4 style={{ color: "green" }}>Update Delete</h4>
-
+                            {cartItem.quantity}{" "}
+                            <h4 style={{ color: "green" }}>Update Delete</h4>
                           </span>
                         </div>
                       </div>
@@ -110,8 +111,20 @@ export function CheckoutPage({ cart = [] }) {
                                   2,
                                 )} - Shipping`;
 
+                          const updateDeliveryOption = async () => {
+                           await  axios.put(`/api/cart-items/${cartItem.productId}`, {
+                              deliveryOptionId: option.id,
+                            });
+                            await loadCart();
+                            updatePayemntSummary();
+                          };
+
                           return (
-                            <div key={option.id} className="delivery-option">
+                            <div
+                              key={option.id}
+                              className="delivery-option"
+                              onClick={updateDeliveryOption}
+                            >
                               <input
                                 type="radio"
                                 readOnly
